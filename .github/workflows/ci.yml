@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history, needed for SonarCloud
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, dom, curl, libxml, pdo, pdo_sqlite, sqlite3, zip, bcmath
+          coverage: xdebug
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Laravel bootstrap (.env, APP_KEY)
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Laravel Pint (code style)
+        run: vendor/bin/pint --test
+
+      - name: Larastan (static analysis)
+        run: vendor/bin/phpstan analyse --memory-limit=1G
+
+      - name: PHPUnit tests
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Composer audit (dependency security)
+        run: composer audit
+
+      - name: SonarCloud scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        continue-on-error: true # remove once SONAR_TOKEN secret is configured
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
