@@ -43,20 +43,130 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
-      - name: Laravel Pint (code style)
+      - name: Run Laravel Pint (Code Style)
+        id: pint
         run: vendor/bin/pint --test
 
-      - name: Larastan (static analysis)
-        run: vendor/bin/phpstan analyse --memory-limit=1G
+      - name: Explain Pint failure
+        if: always() && steps.pint.outcome == 'failure'
+        run: |
+          echo "::error title=Code style check failed::Laravel Pint found style violations — run 'vendor/bin/pint' locally to auto-fix, then commit and push."
+          {
+            echo "## ❌ Code style check failed (Laravel Pint)"
+            echo ""
+            echo "Pint found code that doesn't match the project's formatting rules (spacing, imports, etc.). This is a style-only check — it does not mean the code is broken."
+            echo ""
+            echo "**Fix locally, then commit and push again:**"
+            echo '```bash'
+            echo "vendor/bin/pint"
+            echo '```'
+            echo "This rewrites the offending files in place to match the required style."
+          } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: PHPUnit tests
+      - name: Run Larastan (Static Analysis)
+        id: larastan
+        run: vendor/bin/phpstan analyse --memory-limit=1G --error-format=github
+
+      - name: Explain Larastan failure
+        if: always() && steps.larastan.outcome == 'failure'
+        run: |
+          echo "::error title=Static analysis failed::Larastan found type/logic errors — see the inline annotations above (or run 'vendor/bin/phpstan analyse' locally) for exact file:line."
+          {
+            echo "## ❌ Static analysis failed (Larastan / PHPStan)"
+            echo ""
+            echo "Larastan found type errors, undefined methods/properties, or other issues it can detect without running the code — e.g. calling a method that doesn't exist, or passing a wrong type."
+            echo ""
+            echo "**Reproduce locally:**"
+            echo '```bash'
+            echo "vendor/bin/phpstan analyse --memory-limit=1G"
+            echo '```'
+            echo "Read the reported file:line and fix the actual type/logic issue — these are rarely false positives once you check the referenced line."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run PHPUnit Tests
+        id: phpunit
         run: vendor/bin/phpunit --coverage-clover=coverage.xml
 
-      - name: Composer audit (dependency security)
+      - name: Explain PHPUnit failure
+        if: always() && steps.phpunit.outcome == 'failure'
+        run: |
+          echo "::error title=Tests failed::One or more PHPUnit tests failed — run 'vendor/bin/phpunit' locally to see the assertion diff."
+          {
+            echo "## ❌ Tests failed (PHPUnit)"
+            echo ""
+            echo "One or more feature/unit tests failed — meaning actual application behavior no longer matches what the test expects. This is a functional regression, not a style/lint issue."
+            echo ""
+            echo "**Reproduce locally:**"
+            echo '```bash'
+            echo "vendor/bin/phpunit"
+            echo '```'
+            echo "Check the failing test name and assertion diff in the log above to find which change broke it."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Run Composer Audit (Dependency Security)
+        id: composer_audit
         run: composer audit
+
+      - name: Explain Composer audit failure
+        if: always() && steps.composer_audit.outcome == 'failure'
+        run: |
+          composer audit --format=json --no-interaction > audit-result.json || true
+          PACKAGES=$(jq -r '.advisories | keys | join(" ")' audit-result.json 2>/dev/null)
+          if [ -z "$PACKAGES" ]; then
+            PACKAGES="<package1> <package2>"
+          fi
+          echo "::error title=Dependency security scan failed::Vulnerable packages: $PACKAGES — run 'composer update $PACKAGES --with-all-dependencies' locally to fix."
+          {
+            echo "## ❌ Dependency security scan failed (composer audit)"
+            echo ""
+            echo "This does NOT mean Laravel or your code is broken. It means one or more packages in composer.lock are pinned to a version with a *publicly disclosed* security advisory — often a transitive dependency (e.g. guzzlehttp/guzzle pulled in by laravel/framework), not something you installed directly."
+            echo ""
+            echo "**Affected packages in this run:** \`$PACKAGES\`"
+            echo ""
+            echo "**Why it happens:** composer.lock freezes exact versions. Advisories get published continuously, sometimes long after a version was locked, so a previously-clean lock file can start failing with no code change on your part."
+            echo ""
+            echo "**Fix locally — copy-paste this exact command (see docs/ci-cd.md for background):**"
+            echo '```bash'
+            echo "composer update $PACKAGES --with-all-dependencies"
+            echo "composer audit   # confirm it's clean"
+            echo '```'
+            echo "Then commit the updated composer.lock and push."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload composer audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: composer-audit-report
+          path: audit-result.json
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v4
         continue-on-error: true # remove once SONAR_TOKEN secret is configured
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Pipeline summary
+        if: always()
+        run: |
+          {
+            echo "## 📋 Pipeline Summary"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Laravel Pint (style) | ${{ steps.pint.outcome }} |"
+            echo "| Larastan (static analysis) | ${{ steps.larastan.outcome }} |"
+            echo "| PHPUnit (tests) | ${{ steps.phpunit.outcome }} |"
+            echo "| Composer audit (security) | ${{ steps.composer_audit.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
