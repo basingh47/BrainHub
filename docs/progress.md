@@ -12,7 +12,15 @@ A running record of what has actually been built so far. For the full feature ch
 - **2026-07-10** — GitHub Actions CI/CD pipeline added: Laravel Pint (style), Larastan (static analysis), automated tests, and SonarCloud integration (`ac56524`, PR #2).
 - Render deployment configured; Aiven MySQL database connected in production.
 - README rewritten to describe BrainHub as a project (replacing the default Laravel boilerplate).
-- `docs/` folder started with `roadmap.md` (feature checklist) and `architecture.md` (planned, currently empty).
+- `composer.lock` updated to patch disclosed vulnerabilities in `guzzlehttp/guzzle` and `guzzlehttp/psr7` (transitive deps of `laravel/framework`).
+- CI pipeline hardened with readable failure explanations, GitHub-annotation error formats, coverage/audit artifact uploads, and a pass/fail summary table (see `ci-cd.md`).
+- `main` branch protection configured: required PR + required status checks (Pint, Larastan, PHPUnit, Composer Audit), blocked force pushes, required conversation resolution.
+- `docs/` folder now includes:
+  - `roadmap.md` — feature checklist
+  - `architecture.md` — stack, structure, environments, deployment
+  - `ci-cd.md` — pipeline steps + troubleshooting guide
+  - `github-branch-protection.md` — branch protection rules
+  - `SonarCloud.md` — code quality scanning setup and limitations
 
 ### Codebase State
 - Still on the default Laravel scaffold: only the built-in `users`, `cache`, and `jobs` migrations exist.
