@@ -1,0 +1,48 @@
+# Local only — Render does NOT read this file.
+# Builds the root Dockerfile (Docker-v2: PHP + Vite assets for Breeze).
+# Compose adds MySQL + env for local smoke tests. No .env file required.
+
+services:
+  app:
+    build: .
+    ports:
+      - "10000:10000"
+    environment:
+      APP_NAME: BrainHub
+      APP_ENV: local
+      APP_DEBUG: "true"
+      # Local-only key (32 bytes). Not used by Render. Safe to commit for learning.
+      APP_KEY: base64:YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
+      APP_URL: http://localhost:10000
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: brainhub
+      DB_USERNAME: brainhub
+      DB_PASSWORD: secret
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: brainhub
+      MYSQL_USER: brainhub
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+    ports:
+      - "3307:3306"
+    volumes:
+      - brainhub_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootsecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  brainhub_mysql:
