@@ -164,6 +164,7 @@ jobs:
           retention-days: 14
 
       - name: SonarCloud scan
+        id: sonar
         uses: SonarSource/sonarqube-scan-action@v8
         continue-on-error: true # remove once SONAR_TOKEN secret is configured
         env:
@@ -181,4 +182,5 @@ jobs:
             echo "| Larastan (static analysis) | ${{ steps.larastan.outcome }} |"
             echo "| PHPUnit (tests) | ${{ steps.phpunit.outcome }} |"
             echo "| Composer audit (security) | ${{ steps.composer_audit.outcome }} |"
+            echo "| SonarCloud (non-blocking) | ${{ steps.sonar.outcome }} |"
           } >> "$GITHUB_STEP_SUMMARY"
