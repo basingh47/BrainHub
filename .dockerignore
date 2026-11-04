@@ -10,5 +10,3 @@ bootstrap/cache/*.php
 docs
 tests
 docker-compose.yml
-# Stray SQLite file in the repo root — must never ship in the image
-laravel
