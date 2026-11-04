@@ -1,6 +1,6 @@
 # 🗺️ BrainHub Roadmap
 
-This document outlines the planned development of BrainHub across multiple versions.
+This document tracks the plan for BrainHub Version 1.
 
 ---
 
@@ -17,23 +17,24 @@ This document outlines the planned development of BrainHub across multiple versi
 - [x] Render Deployment
 - [x] Aiven MySQL Database Connected
 - [x] Production Environment Configured
+- [x] Docker (NGINX + PHP-FPM)
 
 ## Authentication
 
-- [ ] Laravel Breeze Installation
-- [ ] User Registration
-- [ ] User Login
-- [ ] Logout
-- [ ] Forgot Password
-- [ ] Password Reset
-- [ ] Email Verification
-- [ ] Protected Dashboard
+- [x] Laravel Breeze Installation
+- [x] User Registration
+- [x] User Login
+- [x] Logout
+- [x] Forgot Password (needs a mail service in production)
+- [x] Password Reset
+- [ ] Email Verification (code in place, not enforced yet)
+- [x] Protected Dashboard
 
 ## Dashboard
 
 - [ ] Dashboard Layout
 - [ ] Sidebar Navigation
-- [ ] Top Navigation
+- [x] Top Navigation
 - [ ] Overview Widgets
 - [ ] Responsive Design
 
@@ -68,8 +69,8 @@ This document outlines the planned development of BrainHub across multiple versi
 
 ## User Profile
 
-- [ ] Edit Profile
-- [ ] Change Password
+- [x] Edit Profile
+- [x] Change Password
 - [ ] Avatar Upload
 - [ ] Theme Settings
 
@@ -80,47 +81,4 @@ This document outlines the planned development of BrainHub across multiple versi
 
 ---
 
-# Version 2.0 — Productivity
-
-**Status:** 📋 Planned
-
-- [ ] Google Login
-- [ ] GitHub Login
-- [ ] Dashboard Analytics
-- [ ] Focus Timer
-- [ ] Habit Tracker
-- [ ] AI Assistant
-- [ ] File Uploads
-- [ ] Notifications
-- [ ] Rich Text Notes
-
----
-
-# Version 3.0 — Advanced
-
-**Status:** 📋 Planned
-
-- [ ] REST API
-- [ ] Laravel Sanctum
-- [ ] Mobile API Support
-- [ ] Redis
-- [ ] Queue Workers
-- [ ] Docker
-- [ ] WebSockets
-- [ ] Unit & Feature Testing
-- [ ] Performance Optimization
-- [ ] Monitoring & Logging
-
----
-
-## Release Strategy
-
-| Version | Goal | Status |
-|---------|------|--------|
-| 1.0 | Foundation (MVP) | 🚧 In Development |
-| 2.0 | Productivity Features | 📋 Planned |
-| 3.0 | Advanced & Scalable Architecture | 📋 Planned |
-
----
-
-Last Updated: 28 July 2026
+Last Updated: 4 November 2026

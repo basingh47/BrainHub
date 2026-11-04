@@ -14,7 +14,7 @@ The project is being developed as a long-term portfolio and learning project usi
 
 **Version:** `1.0.0 (In Development)`
 
-Version 1 focuses on building a stable foundation with essential productivity features before introducing advanced functionality in future releases.
+Version 1 focuses on a stable foundation with essential productivity features.
 
 ---
 
@@ -32,45 +32,51 @@ Version 1 focuses on building a stable foundation with essential productivity fe
 - Alpine.js
 
 ### Deployment
+- Docker (NGINX + PHP-FPM)
 - Render
-- GitHub
-- GitHub Actions (CI/CD)
+- GitHub Actions (CI)
 
 ---
 
 ## Features (Version 1)
 
-- Authentication
+- Authentication ✅ (Laravel Breeze)
 - Dashboard
 - Task Management
 - Goals Management
 - Notes
 - Calendar
-- User Profile
+- User Profile ✅ (edit profile, change password, delete account)
 - Settings
 
 ---
 
 ## Documentation
 
-Project documentation is available in the `docs/` directory.
+All docs are in [`docs/`](docs/README.md):
 
-- Project Roadmap
-- System Architecture
-- [Deployment](docs/deployment.md) — Docker (NGINX + PHP-FPM), Render, local Compose
-- Authentication
-- Database Design
-- Deployment Guide
-- Technical Decisions
-- Release Notes
+- [Architecture](docs/architecture.md) — stack, code-to-live flow, database
+- [Pull request workflow](docs/git-workflow/pull-requests.md) — branches, commits, PRs
+- [GitHub Actions CI](docs/ci-cd/github-actions.md) — checks and how to fix failures
+- [Deployment](docs/deployment/render-and-local.md) — Render settings and local Docker Compose
+
+---
+
+## Run locally
+
+```bash
+docker compose up -d --build
+```
+
+Open http://localhost:8080. Migrations run automatically.
 
 ---
 
 ## Project Status
 
-🚧 Active Development
+🚧 Version 1 in development
 
-BrainHub is currently under active development and will continue to evolve through multiple versions.
+Done: project setup, CI, live deployment on Render, authentication and user profile. Next: dashboard and productivity features.
 
 ---
 

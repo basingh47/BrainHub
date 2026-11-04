@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────
-# Docker v3 — NGINX + PHP-FPM (serversideup/php, supervised by S6).
+# Production image — NGINX + PHP-FPM (serversideup/php, supervised by S6).
 # Replaces `php artisan serve` (single-threaded dev server).
-# See docs/deployment.md.
+# See docs/deployment/render-and-local.md.
 # ─────────────────────────────────────────────────────────────
 
 # Stage 1: PHP dependencies (also used so Tailwind can scan pagination views)

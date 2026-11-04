@@ -14,6 +14,8 @@ These rules help ensure that only reviewed and validated code is merged into `ma
 main
 ```
 
+Rules are set as a GitHub **ruleset** (Settings → Rules). A rejected push shows `GH013: Repository rule violations found for refs/heads/main`.
+
 ---
 
 ## Rules Configured
@@ -22,9 +24,14 @@ main
 
 **Enabled:** ✅
 
-All changes must be merged through a Pull Request.
+All changes must be merged through a Pull Request. A direct `git push` to `main` is rejected with:
 
-Direct development should happen on feature or develop branches.
+```
+- Changes must be made through a pull request.
+- Required status check "ci" is expected.
+```
+
+Work on a branch (`feature/*`, `fix/*`, `docs/*`, …) and open a PR.
 
 Example:
 
@@ -46,13 +53,9 @@ main
 
 A Pull Request cannot be merged until all required CI checks complete successfully.
 
-Current required checks:
+Required check: **`ci`** — the single job in `.github/workflows/ci.yml`.
 
-- Laravel Pint
-- Larastan
-- PHPUnit
-- Composer Audit
-- Any future required GitHub Action checks
+That job fails if any blocking step fails: asset build, Laravel Pint, Larastan, PHPUnit, Composer Audit, or the SonarCloud scan. See [GitHub Actions](../ci-cd/github-actions.md).
 
 If any check fails:
 
@@ -97,9 +100,7 @@ This prevents accidental history rewrites and protects production history.
 
 **Current Setting:** Disabled
 
-This remains disabled while developing the project independently.
-
-It can be enabled later to completely prevent direct pushes to `main`.
+Not needed: rule 1 already rejects direct pushes to `main`. This setting would additionally limit *who* can update the branch.
 
 ---
 
@@ -126,11 +127,12 @@ Create Pull Request
       │
       ▼
 GitHub Actions
+ ├── Build assets (Vite)
  ├── Laravel Pint
  ├── Larastan
  ├── PHPUnit
  ├── Composer Audit
- └── SonarCloud (optional)
+ └── SonarCloud
       │
       ▼
 All checks pass?
@@ -167,6 +169,9 @@ When the project grows into a team project, consider enabling:
 
 - Require 1 reviewer approval
 - Require branches to be up to date before merging
-- Restrict direct pushes to `main`
 - Require CODEOWNERS reviews
 - Require signed commits
+
+---
+
+*Last updated: 4 November 2026*
