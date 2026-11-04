@@ -1,6 +1,6 @@
 # 🏗️ BrainHub Architecture
 
-This document describes the current technical architecture of BrainHub. For feature status see [roadmap.md](roadmap.md) and [progress.md](progress.md).
+This document describes the current technical architecture of BrainHub. For feature status see [roadmap.md](roadmap.md).
 
 ---
 

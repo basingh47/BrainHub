@@ -1,4 +1,4 @@
-# Docker v3 — Production and local
+# Deployment — Production and local
 
 ## Production (Render)
 
@@ -9,7 +9,7 @@ User → Cloudflare → Render proxy (HTTPS) → container :8080
                                                             Aiven MySQL (SSL)
 ```
 
-### ⚠️ Required Render changes before deploying v3
+### Required Render settings
 
 | Setting | Where | Value |
 |---|---|---|
@@ -19,7 +19,7 @@ User → Cloudflare → Render proxy (HTTPS) → container :8080
 Render's default `PORT` is 10000. Setting it to `8080` tells Render where NGINX is listening,
 instead of relying on Render's port auto-detection.
 
-### Render environment (unchanged from v2)
+### Render environment
 
 | Variable | Note |
 |---|---|
@@ -42,7 +42,7 @@ If migrations fail, the container does not start and Render keeps the old versio
 
 ## Local (Docker Compose)
 
-Same `docker-compose.yml` (app + local MySQL), port changed to **8080**:
+`docker-compose.yml` runs the same image with a local MySQL, on port **8080**:
 
 ```bash
 docker compose build
@@ -63,23 +63,3 @@ Artisan inside the container:
 ```bash
 docker compose exec app php artisan about
 ```
-
----
-
-## v2 vs v3 checklist
-
-| Topic | v2 | v3 |
-|---|---|---|
-| Web server | `artisan serve` | NGINX + PHP-FPM |
-| Parallel requests | No | Yes (6 PHP workers) |
-| Static files | Through PHP | NGINX, gzip, 1-year cache |
-| OPcache | Off | On |
-| Migrations on deploy | Manual | Automatic |
-| Config/route/view cache | No | Yes (`optimize`) |
-| Runs as | root | `www-data` |
-| Port | 10000 | **8080** |
-| MySQL in image | No | No (Aiven / Compose) |
-
----
-
-*See also: [problem](./01-problem-why-v2-not-enough.md) · [Dockerfile solution](./02-solution-dockerfile.md) · [Docker-v2](../Docker-v2/)*
