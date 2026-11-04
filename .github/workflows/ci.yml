@@ -146,7 +146,7 @@ jobs:
             echo ""
             echo "**Why it happens:** composer.lock freezes exact versions. Advisories get published continuously, sometimes long after a version was locked, so a previously-clean lock file can start failing with no code change on your part."
             echo ""
-            echo "**Fix locally — copy-paste this exact command (see docs/ci-cd.md for background):**"
+            echo "**Fix locally — copy-paste this exact command (see docs/ci-cd/github-actions.md for background):**"
             echo '```bash'
             echo "composer update $PACKAGES --with-all-dependencies"
             echo "composer audit   # confirm it's clean"

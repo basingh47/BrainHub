@@ -94,7 +94,7 @@ Browser ─HTTPS─▶ Render proxy ─▶ container :8080
 
 - **One container** (Render free plan does not include background workers or cron jobs).
 - **Image** built in three stages: Composer packages → Vite assets → final `serversideup/php:8.4-fpm-nginx` image. Node is not in the final image.
-- **Settings** come from Render environment variables. See [deployment.md](deployment.md).
+- **Settings** come from Render environment variables. See [deployment/render-and-local.md](deployment/render-and-local.md).
 
 ---
 
