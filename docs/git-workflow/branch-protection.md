@@ -55,7 +55,7 @@ A Pull Request cannot be merged until all required CI checks complete successful
 
 Required check: **`ci`** — the single job in `.github/workflows/ci.yml`.
 
-That job fails if any blocking step fails: asset build, Laravel Pint, Larastan, PHPUnit, or Composer Audit. SonarCloud runs inside it but is non-blocking. See [GitHub Actions](../ci-cd/github-actions.md).
+That job fails if any blocking step fails: asset build, Laravel Pint, Larastan, PHPUnit, Composer Audit, or the SonarCloud scan. See [GitHub Actions](../ci-cd/github-actions.md).
 
 If any check fails:
 
@@ -132,7 +132,7 @@ GitHub Actions
  ├── Larastan
  ├── PHPUnit
  ├── Composer Audit
- └── SonarCloud (non-blocking)
+ └── SonarCloud
       │
       ▼
 All checks pass?

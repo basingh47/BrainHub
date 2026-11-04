@@ -27,7 +27,7 @@ Pull Request → GitHub Actions (ci)
                  ├── Larastan
                  ├── PHPUnit  → coverage.xml
                  ├── Composer Audit
-                 └── SonarCloud Scan (non-blocking)
+                 └── SonarCloud Scan
 ```
 
 | Item | Where |
@@ -35,7 +35,7 @@ Pull Request → GitHub Actions (ci)
 | Workflow step | `.github/workflows/ci.yml` → `SonarSource/sonarqube-scan-action@v8` |
 | Project settings | `sonar-project.properties` (organization `basingh47-1`, key `basingh47_BrainHub`, sources `app`, tests `tests`, coverage `coverage.xml`) |
 | Auth | `SONAR_TOKEN` repository secret (GitHub → Settings → Secrets → Actions) |
-| Blocking? | No — `continue-on-error: true`, so a failed scan does not fail CI |
+| Blocking? | Yes — a failed scan (e.g. invalid token) fails the `ci` check |
 
 The action was updated on 2026-07-29 from `@v4` (flagged by GitHub as unsupported) to `@v8`.
 
@@ -47,15 +47,27 @@ The action was updated on 2026-07-29 from `@v4` (flagged by GitHub as unsupporte
 |---|---|
 | GitHub repository | Public |
 | SonarCloud project | Public (free plan: branch and pull request analysis included) |
-| Last analysis | **10 July 2026** (`main`, and PR #2) |
-| Later PRs (#4, #6) | ❌ Not analyzed |
+| Pull requests | ✅ Analyzed on every PR |
+| `main` | Not re-analyzed after merge (CI does not run on pushes to `main`) |
 
-Scans stopped after July. Because the step is non-blocking, CI stays green and the failure is easy to miss. To find the cause, open a recent CI run → **SonarCloud scan** step log. Common causes:
+### `SONAR_TOKEN`
 
-- `SONAR_TOKEN` secret missing or expired.
-- SonarCloud **Automatic Analysis** is enabled for the project, which conflicts with CI-based analysis (SonarCloud → Administration → Analysis Method → turn it off).
+The scan authenticates with a **personal access token** stored as the `SONAR_TOKEN` repository secret. Personal tokens expire.
 
-Also note: CI does not run on pushes to `main`, so `main` is not re-analyzed after a merge. Adding `main` to the workflow's `push:` branches would fix that.
+**Symptom of an expired or missing token** — the SonarCloud scan step fails with:
+
+```
+ERROR Failed to query JRE metadata: ... failed with HTTP 403 Forbidden.
+Please check the property sonar.token or the environment variable SONAR_TOKEN.
+```
+
+**Renew it:**
+
+1. https://sonarcloud.io/account/security → **Personal Tokens** → name `github-actions-brainhub`, longest expiry → **Generate**, copy it.
+2. https://github.com/basingh47/BrainHub/settings/secrets/actions → update `SONAR_TOKEN`.
+3. Re-run the failed CI run.
+
+History: scans silently failed from July to November 2026 because the token had expired and the step was `continue-on-error`. Fixed on 4 November 2026 (new token, step made blocking, result added to the CI summary).
 
 ---
 
@@ -68,7 +80,7 @@ The SonarCloud dashboard shows, per branch and pull request:
 - Code Duplication
 - Test Coverage (from `coverage.xml`)
 
-The last `main` analysis (10 July 2026) reported 0 bugs, 3 vulnerabilities and 9 code smells.
+Open the project at https://sonarcloud.io/project/overview?id=basingh47_BrainHub.
 
 ---
 
@@ -88,9 +100,8 @@ This helps improve the overall health of the codebase over time.
 
 ## Future Improvements
 
-- Fix the stopped scans (see above)
 - Run CI on pushes to `main` so `main` is analyzed after each merge
-- Make the scan blocking (remove `continue-on-error`) and enforce the Sonar Quality Gate before merging
+- Enforce the Sonar Quality Gate before merging
 
 ---
 

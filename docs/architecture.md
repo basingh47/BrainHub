@@ -58,7 +58,7 @@ If any CI check fails, the PR cannot be merged. If the new container fails (for 
 | Static analysis | `vendor/bin/phpstan analyse` | Type or logic errors found |
 | Tests | `vendor/bin/phpunit --coverage-clover=coverage.xml` | Any test fails |
 | Security | `composer audit` | A package has a known vulnerability |
-| Code quality | SonarCloud scan | Non-blocking (`continue-on-error`) |
+| Code quality | SonarCloud scan | Scan fails (e.g. invalid `SONAR_TOKEN`) |
 
 CI runs on PRs into `main` and `develop`, on pushes to `develop`, and manually.
 
@@ -139,7 +139,7 @@ tests/Feature/               Auth and profile tests
 - No queue worker or scheduler in production (Render free plan).
 - Mail is not configured, so password reset emails are not sent.
 - Uploaded files would be lost on redeploy (no S3/R2 yet).
-- SonarCloud is non-blocking.
+- SonarCloud token (`SONAR_TOKEN`) expires and must be renewed (see [sonarcloud.md](ci-cd/sonarcloud.md)).
 
 ---
 

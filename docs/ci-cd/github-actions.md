@@ -28,7 +28,7 @@ The whole workflow is one job named `ci`. That job is the required status check 
 | 8 | Static analysis (config: `phpstan.neon`) | `vendor/bin/phpstan analyse` | ✅ |
 | 9 | Tests + coverage (config: `phpunit.xml`) | `vendor/bin/phpunit --coverage-clover=coverage.xml` | ✅ |
 | 10 | Dependency security | `composer audit` | ✅ |
-| 11 | SonarCloud scan (config: `sonar-project.properties`) | `SonarSource/sonarqube-scan-action` | ❌ `continue-on-error` |
+| 11 | SonarCloud scan (config: `sonar-project.properties`) | `SonarSource/sonarqube-scan-action` | ✅ |
 | 12 | Pipeline summary | written to the run's Summary tab | — |
 
 Each blocking check has an "Explain … failure" step that prints the cause and the fix command in the run log. Coverage and audit reports are uploaded as run artifacts.
