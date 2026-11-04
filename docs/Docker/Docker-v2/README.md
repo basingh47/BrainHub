@@ -1,6 +1,6 @@
 # Docker v2 — Breeze (authentication)
 
-**Status:** Current (replaces v1 for deploying Breeze)  
+**Status:** Historical — replaced by [Docker-v3](../Docker-v3/) (NGINX + PHP-FPM)  
 **Date:** August 2026  
 **App scope:** Laravel Breeze — login, register, password reset, email verify, profile, dashboard  
 

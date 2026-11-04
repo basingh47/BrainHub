@@ -1,25 +1,14 @@
 # ─────────────────────────────────────────────────────────────
-# Docker v2 — Breeze needs compiled Vite assets in the image.
-# See docs/Docker/Docker-v2/ for why v1 was not enough.
+# Docker v3 — NGINX + PHP-FPM (serversideup/php, supervised by S6).
+# Replaces `php artisan serve` (single-threaded dev server).
+# See docs/Docker/Docker-v3/ for why v2 was not enough.
 # ─────────────────────────────────────────────────────────────
 
 # Stage 1: PHP dependencies (also used so Tailwind can scan pagination views)
-FROM php:8.4-cli AS vendor
+FROM serversideup/php:8.4-cli AS vendor
 
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libzip-dev \
-    zip \
-    && docker-php-ext-install pdo_mysql zip \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-WORKDIR /app
-
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+COPY --chown=www-data:www-data composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
 
 # ─────────────────────────────────────────────────────────────
 # Stage 2: build frontend (Node is build-time only; not in final image)
@@ -36,44 +25,33 @@ COPY vite.config.js tailwind.config.js postcss.config.js ./
 
 # tailwind.config.js scans Laravel pagination views under vendor/
 COPY --from=vendor \
-    /app/vendor/laravel/framework/src/Illuminate/Pagination/resources/views \
+    /var/www/html/vendor/laravel/framework/src/Illuminate/Pagination/resources/views \
     ./vendor/laravel/framework/src/Illuminate/Pagination/resources/views
 
 RUN npm run build
 
 # ─────────────────────────────────────────────────────────────
 # Stage 3: production image (Render runs this)
+# NGINX :8080 → PHP-FPM → Laravel. Runs as www-data (non-root).
 # ─────────────────────────────────────────────────────────────
-FROM php:8.4-cli
+FROM serversideup/php:8.4-fpm-nginx
 
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libzip-dev \
-    zip \
-    && docker-php-ext-install pdo_mysql zip \
-    && rm -rf /var/lib/apt/lists/*
+# Image defaults — Render / Compose environment variables override these.
+ENV PHP_OPCACHE_ENABLE=1 \
+    # Render free = 512 MB RAM; ~40 MB per PHP worker
+    PHP_FPM_PM_MAX_CHILDREN=6 \
+    # On start: migrate --force, storage:link, optimize (config/route/view/event cache)
+    AUTORUN_ENABLED=true \
+    # Docker HEALTHCHECK hits Laravel's health route (boots the full app)
+    HEALTHCHECK_PATH=/up \
+    LOG_CHANNEL=stderr
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY --chown=www-data:www-data --from=vendor /var/www/html/vendor ./vendor
 
-WORKDIR /var/www/html
-
-COPY --from=vendor /app/vendor ./vendor
-
-COPY . .
+COPY --chown=www-data:www-data . .
 
 RUN composer dump-autoload --optimize --no-dev \
     && php artisan package:discover --ansi
 
 # Required for Breeze @vite — without this, auth pages return HTTP 500
-COPY --from=assets /app/public/build ./public/build
-
-RUN mkdir -p storage/framework/cache \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/logs \
-    && chmod -R 775 storage bootstrap/cache
-
-EXPOSE 10000
-
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+COPY --chown=www-data:www-data --from=assets /app/public/build ./public/build

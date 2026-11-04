@@ -57,7 +57,7 @@ Project documentation is available in the `docs/` directory.
 
 - Project Roadmap
 - System Architecture
-- [Docker (versioned)](docs/Docker/README.md) — current: [Docker-v2](docs/Docker/Docker-v2/README.md) (Breeze)
+- [Docker (versioned)](docs/Docker/README.md) — current: [Docker-v3](docs/Docker/Docker-v3/README.md) (NGINX + PHP-FPM)
 - Authentication
 - Database Design
 - Deployment Guide
