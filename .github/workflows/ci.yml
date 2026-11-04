@@ -38,6 +38,18 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Breeze layouts call @vite — without public/build/manifest.json, auth pages return 500 in tests
+      - name: Build frontend assets (Vite)
+        run: |
+          npm ci
+          npm run build
+
       - name: Laravel bootstrap (.env, APP_KEY)
         run: |
           cp .env.example .env
