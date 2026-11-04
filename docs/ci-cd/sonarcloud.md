@@ -48,7 +48,7 @@ The action was updated on 2026-07-29 from `@v4` (flagged by GitHub as unsupporte
 | GitHub repository | Public |
 | SonarCloud project | Public (free plan: branch and pull request analysis included) |
 | Pull requests | ✅ Analyzed on every PR |
-| `main` | Not re-analyzed after merge (CI does not run on pushes to `main`) |
+| `main` | ✅ Re-analyzed after every merge (CI runs on pushes to `main`) |
 
 ### `SONAR_TOKEN`
 
@@ -100,7 +100,6 @@ This helps improve the overall health of the codebase over time.
 
 ## Future Improvements
 
-- Run CI on pushes to `main` so `main` is analyzed after each merge
 - Enforce the Sonar Quality Gate before merging
 
 ---

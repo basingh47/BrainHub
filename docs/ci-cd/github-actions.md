@@ -7,10 +7,10 @@ Defined in [.github/workflows/ci.yml](../../.github/workflows/ci.yml). This doc 
 ## Triggers
 
 - Pull request targeting `main` or `develop`
-- Push to `develop`
+- Push to `main` or `develop`
 - Manual run (`workflow_dispatch`, from the Actions tab)
 
-CI does **not** run on pushes to `main`. Code reaches `main` only through a PR, which has already passed CI.
+Pushes to `main` happen only when a PR is merged. CI runs again on the merged code so SonarCloud re-analyzes `main` (the project Overview page).
 
 The whole workflow is one job named `ci`. That job is the required status check on `main` (see [branch protection](../git-workflow/branch-protection.md)).
 

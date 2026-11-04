@@ -60,7 +60,7 @@ If any CI check fails, the PR cannot be merged. If the new container fails (for 
 | Security | `composer audit` | A package has a known vulnerability |
 | Code quality | SonarCloud scan | Scan fails (e.g. invalid `SONAR_TOKEN`) |
 
-CI runs on PRs into `main` and `develop`, on pushes to `develop`, and manually.
+CI runs on PRs into `main` and `develop`, on pushes to `main` (after a merge) and `develop`, and manually.
 
 ---
 
