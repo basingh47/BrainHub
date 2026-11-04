@@ -18,10 +18,10 @@ It provides an additional quality gate beyond PHPUnit and Larastan.
 
 ## Current Integration
 
-SonarCloud runs as a step inside the GitHub Actions `ci` job, after the tests (it needs `coverage.xml`).
+SonarCloud runs as a step inside the GitHub Actions `ci` job, after the tests (it needs `coverage.xml`). It runs on every PR and on every push to `main` or `develop`.
 
 ```
-Pull Request → GitHub Actions (ci)
+PR / push to main / push to develop → GitHub Actions (ci)
                  ├── Build assets
                  ├── Laravel Pint
                  ├── Larastan
@@ -71,16 +71,50 @@ History: scans silently failed from July to November 2026 because the token had 
 
 ---
 
-## Reports Available
+## SonarCloud UI — where to see results
 
-The SonarCloud dashboard shows, per branch and pull request:
+Project: https://sonarcloud.io/project/overview?id=basingh47_BrainHub
 
-- Bugs, Vulnerabilities, Security Hotspots, Code Smells
-- Maintainability, Reliability and Security ratings
-- Code Duplication
-- Test Coverage (from `coverage.xml`)
+SonarCloud keeps a **separate result for each place a scan comes from**. Where you look depends on what triggered CI:
 
-Open the project at https://sonarcloud.io/project/overview?id=basingh47_BrainHub.
+| CI ran on | Result appears in | What it reports |
+|---|---|---|
+| A pull request | Left menu → **Project → Pull requests** → `#<number>` | Only **new** issues added by that PR, plus its Quality Gate |
+| A push to `main` (a merged PR) | **Overview** page (default view, branch `main`) | The **whole project**: all issues, ratings, Quality Gate, lines of code |
+| A push to `develop` | Left menu → **Project → Branches** → `develop` | Whole project, on `develop` |
+
+```
+Open PR ──CI──▶ SonarCloud: Pull requests → #N      (Overview unchanged)
+Merge PR ──CI on main──▶ SonarCloud: Overview        (updated ~2 min after merge)
+```
+
+A green PR check does **not** change the Overview. The Overview only updates after the PR is merged and CI finishes on `main`.
+
+### Main pages
+
+| Page (left menu) | Use it for |
+|---|---|
+| **Overview** | Health of `main`: Quality Gate, issue count, duplication, coverage, security rating, and "Last analysis" date |
+| **Analysis → Issues** | Full list of bugs, vulnerabilities and code smells, with file and line. Filter by branch or PR at the top |
+| **Analysis → Security Hotspots** | *Deprecated by SonarCloud* — hotspot findings now appear under **Issues** |
+| **Project → Pull requests** | Result of each PR scan |
+| **Project → Branches** | Results for branches other than `main` |
+| **Reporting → Activity** | History of analyses (check here that a scan actually arrived) |
+| **Policies → Quality gate** | The pass/fail rules applied to new code |
+
+### Reading the Overview
+
+| You see | Meaning |
+|---|---|
+| **Last analysis X ago** | When `main` was last scanned. If it is older than the last merge, the scan on `main` failed — check the CI run on `main` |
+| **Quality gate: Not computed** | No CI analysis of `main` has completed yet |
+| **Quality gate: Passed / Failed** | Whether `main` meets the Quality Gate rules |
+| **Lines of code** | Size of what is scanned (`app/` only, per `sonar-project.properties`) |
+| **Coverage: No data** | `coverage.xml` was not picked up by the scan |
+
+### Why a PR can show 0 issues
+
+Only files under `app/` are scanned (`sonar.sources=app`). A PR that changes only docs, CI, config or views reports no new issues.
 
 ---
 
