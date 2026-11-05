@@ -23,9 +23,34 @@ services:
       SESSION_DRIVER: database
       CACHE_STORE: database
       QUEUE_CONNECTION: database
+      # ── LOCAL DEV MODE (this file is skip-worktree: never committed) ──
+      # PHP re-reads edited files on every request (production keeps them in memory).
+      PHP_OPCACHE_ENABLE: "0"
+      # Skip all Laravel caching on start, so route/config/view changes show immediately.
+      # (OPTIMIZE=false alone falls back to per-cache switches, which default to true.)
+      AUTORUN_LARAVEL_OPTIMIZE: "false"
+      AUTORUN_LARAVEL_CONFIG_CACHE: "false"
+      AUTORUN_LARAVEL_ROUTE_CACHE: "false"
+      AUTORUN_LARAVEL_VIEW_CACHE: "false"
+      AUTORUN_LARAVEL_EVENT_CACHE: "false"
+      # Skip storage:link — www-data can't create the symlink in your mounted folder.
+      AUTORUN_LARAVEL_STORAGE_LINK: "false"
+    volumes:
+      # Live code: the container reads your project folder instead of the copy baked into the image.
+      - .:/var/www/html
     depends_on:
       mysql:
         condition: service_healthy
+
+  node:
+    # Rebuilds Tailwind CSS/JS into public/build every time you save a file.
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      # Keep node_modules inside Docker (Linux packages), not in your project folder.
+      - brainhub_node_modules:/app/node_modules
+    command: sh -c "npm ci && npm run build -- --watch"
 
   mysql:
     image: mysql:8.0
@@ -46,3 +71,4 @@ services:
 
 volumes:
   brainhub_mysql:
+  brainhub_node_modules:
