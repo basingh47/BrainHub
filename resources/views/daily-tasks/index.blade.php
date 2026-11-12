@@ -1,21 +1,8 @@
-<x-app-layout>
+@extends('daily-tasks.layouts.daily-tasks-layout')
 
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-900">Daily Tasks</h2>
-                <p class="text-sm text-gray-600">{{ now()->format('l, j F Y') }}</p>
-            </div>
 
-            <a href="{{ route('daily-tasks.create') }}"
-               class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
-                + Add task
-            </a>
-        </div>
-    </x-slot>
-
-    <div class="py-8">
-        <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+@section('content')
+    <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
 
             {{-- Flash message (set by ->with('status', ...) in the controller, shown once) --}}
             @if (session('status'))
@@ -195,9 +182,9 @@
                                                             @csrf
                                                             @method('DELETE')
                                                                <button type="submit"
-            class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-gray-100">
-        Delete
-    </button>
+                                                                class="block w-full px-4 py-2 text-start text-sm text-red-700 hover:bg-gray-100">
+                                                                    Delete
+                                                                </button>
                                                         </form>
                                                     </x-slot>
                                                 </x-dropdown>
@@ -216,6 +203,7 @@
             </section>
 
         </div>
-    </div>
+@endsection
 
-</x-app-layout>
+
+
