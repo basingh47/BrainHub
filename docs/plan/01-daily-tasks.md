@@ -1,48 +1,47 @@
 # 1️⃣ Daily Tasks
 
-**Status:** 🚧 In progress (features done, quality work left) · **Branch:** `feature/daily-tasks` · **Depends on:** nothing
+**Status:** ✅ Released (v1) · live on Render since 2026-11-16 · PRs #15 (→ develop), #16 (sync), #17 (→ main) · **Depends on:** nothing
 
 **Goal:** create, complete and reschedule one-off tasks; keep completed tasks as history.
 
 ---
 
-## ✅ Done
+## ✅ Done (v1)
 
-- Database: `daily_tasks` migration, `DailyTask` model (fillable, casts, `markCompleted()` / `markIncomplete()`), factory, seeder
+- Database: `daily_tasks` migration, `DailyTask` model (fillable, casts, `markCompleted()` / `markIncomplete()`), factory with `overdue()` / `completed()` states, seeder
 - List page: today's tasks (open first, completed last), overdue box, stat cards
-- Add and Edit pages with Form Requests (`Store…`, `Update…`)
+- Add and Edit pages with Form Requests (`Store…`, `Update…`, `Move…`)
 - Actions: Complete, Reopen, Move (popup), Delete
 - UI: flash messages by type (`<x-flash>`), completed-row look, Daily Tasks in the navigation
-- Routes behind `auth`; `show` removed; filters removed from scope
+- 17 feature tests (`tests/Feature/DailyTaskTest.php`) covering every action and business rule
+- CI green (Pint, Larastan, PHPUnit, composer audit, SonarCloud) · deployed to production
 
 ---
 
-## ⏳ Remaining
+## ⏳ Remaining (v1.1 — not blocking)
 
-### Must have (finish v1)
+### Code quality
 
 | # | Work | Why |
 |---|---|---|
-| 1 | **Feature tests** for every action and rule | nothing is tested yet; CI must prove the rules |
-| 2 | **Enums** `TaskStatus`, `TaskPriority`, `TaskCategory` + model casts + `Rule::enum` | replace magic strings like `'completed'` |
-| 3 | **Badge components** `<x-status-badge>`, `<x-priority-badge>` | badges are inline `@php` arrays in `index.blade.php` |
-| 4 | `update()` uses `markCompleted()` / `markIncomplete()` | the `completed_at` rule should live only in the model |
-| 5 | **Commit** in small commits → PR → CI green → merge | all work is still uncommitted |
+| 1 | **Enums** `TaskStatus`, `TaskPriority`, `TaskCategory` + model casts + `Rule::enum` | replace magic strings like `'completed'` |
+| 2 | **Badge components** `<x-status-badge>`, `<x-priority-badge>` | badges are inline `@php` arrays in `index.blade.php`; reusable on the Dashboard |
+| 3 | `update()` uses `markCompleted()` / `markIncomplete()` | the `completed_at` rule should live only in the model |
 
-### Should have (UI polish)
+### UI polish
 
 | # | Work |
 |---|---|
-| 6 | **Undo** button in the "completed" flash message (uses `reopen`) |
-| 7 | "All done for today 🎉" message when every task today is completed |
-| 8 | Delete confirmation as a popover (replace the browser `confirm()`) |
-| 9 | Display fixes: due time `14:30` (no seconds), `—` for empty category, "3 days late" in the overdue box |
+| 4 | **Undo** button in the "completed" flash message (uses `reopen`) |
+| 5 | "All done for today 🎉" message when every task today is completed |
+| 6 | Delete confirmation as a popover (replace the browser `confirm()`) |
+| 7 | Display fixes: due time `14:30` (no seconds), `—` for empty category, "3 days late" in the overdue box |
 
 ### Decide
 
 | # | Question |
 |---|---|
-| 10 | **History of completed tasks**: build a small history view, or move it to *Out of scope*? (today the page shows only today + overdue) |
+| 8 | **History of completed tasks**: build a small history view, or move it to *Out of scope*? (today the page shows only today + overdue) |
 
 ---
 
@@ -84,14 +83,14 @@ Extra action routes are defined before `Route::resource(...)->except(['show'])`.
 
 | Criterion | Built | Tested |
 |---|---|---|
-| Guests are redirected to login | ✅ | ⏳ |
-| Today's tasks and overdue tasks are listed | ✅ | ⏳ |
-| Add, edit, delete; invalid input shows errors | ✅ | ⏳ |
-| Complete sets `completed_at`; Reopen clears it | ✅ | ⏳ |
-| Move to today or later, no duplicate | ✅ | ⏳ |
-| A completed task cannot be moved | ✅ | ⏳ |
-| Completed tasks visible as history | ⏳ (see #10) | ⏳ |
-| Feature tests pass in CI | — | ⏳ |
+| Guests are redirected to login | ✅ | ✅ |
+| Today's tasks and overdue tasks are listed | ✅ | ✅ |
+| Add, edit, delete; invalid input shows errors | ✅ | ✅ |
+| Complete sets `completed_at`; Reopen clears it | ✅ | ✅ |
+| Move to today or later, no duplicate | ✅ | ✅ |
+| A completed task cannot be moved | ✅ | ✅ |
+| Completed tasks visible as history | ⏳ (see #8) | ⏳ |
+| Feature tests pass in CI | ✅ | ✅ |
 
 ## Out of scope (v1)
 
