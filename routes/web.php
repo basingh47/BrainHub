@@ -4,9 +4,8 @@ use App\Http\Controllers\DailyTaskController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Home → sign-up page. Logged-in users are sent on to the dashboard by the 'guest' middleware on /register.
+Route::redirect('/', '/register');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
