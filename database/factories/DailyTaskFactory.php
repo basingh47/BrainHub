@@ -28,4 +28,25 @@ class DailyTaskFactory extends Factory
             'completed_at' => null,
         ];
     }
+
+    /**
+     * State: due in the past and not completed → overdue.
+     */
+    public function overdue(): static
+    {
+        return $this->state(fn () => [
+            'due_date' => today()->subDays(fake()->numberBetween(1, 5)),
+        ]);
+    }
+
+    /**
+     * State: already completed.
+     */
+    public function completed(): static
+    {
+        return $this->state(fn () => [
+            'status' => 'completed',
+            'completed_at' => now(),
+        ]);
+    }
 }
