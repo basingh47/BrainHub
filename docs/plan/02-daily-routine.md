@@ -1,6 +1,6 @@
 # 2️⃣ Daily Routine
 
-**Status:** ⏳ Not started · **Branch:** `feature/daily-routine` · **Depends on:** Daily Tasks done
+**Status:** 🚧 In progress (planning done) · **Branch:** `feature/daily-routine` · **Depends on:** Daily Tasks done
 
 ## Goal
 
@@ -62,7 +62,7 @@ Tuesday 17 Nov — 2 of 3 done
 
 | Screen | Content |
 |---|---|
-| `/routines` | Redirects to this week's sheet; if it does not exist yet → "Create this week's sheet" button |
+| `/daily-routine` | Redirects to this week's sheet; if it does not exist yet → "Create this week's sheet" button |
 | Edit sheet | Checkbox list of active routines → choose which are in this week |
 | Manage routines | List, add, edit, deactivate routine items and sub-tasks |
 | Old weeks | List of past sheets → open read-only |
@@ -133,12 +133,12 @@ Checks are stored only for **leaf** items (routines with no sub-tasks).
 
 | Action | HTTP | URL | Method |
 |---|---|---|---|
-| Entry point → this week | GET | `/routines` | `RoutineWeekController@current` |
+| Entry point → this week (nav link) | GET | `/daily-routine` | `RoutineWeekController@current` |
 | Old weeks list | GET | `/routine-weeks` | `RoutineWeekController@index` |
 | Create this week's sheet (copy last week) | POST | `/routine-weeks` | `RoutineWeekController@store` |
 | Week sheet (+ `?day=` day view) | GET | `/routine-weeks/{week}` | `RoutineWeekController@show` |
 | Edit sheet items | GET / PUT | `/routine-weeks/{week}/edit` · `/routine-weeks/{week}` | `edit` · `update` |
-| Manage routines | resource | `/routines/manage…` | `RoutineController` (`index`, `create`, `store`, `edit`, `update`, `destroy`) |
+| Manage routines | resource | `/routines` | `RoutineController` (`index`, `create`, `store`, `edit`, `update`, `destroy`) |
 | Tick | POST | `/routine-checks` | `RoutineCheckController@store` |
 | Untick | DELETE | `/routine-checks/{check}` | `RoutineCheckController@destroy` |
 
@@ -163,19 +163,152 @@ Self-referencing relationship (`parent` / `children`) · `belongsToMany` with a 
 
 ---
 
-## Implementation checklist
+## Architecture
 
-| Step | Work | Status |
+```text
+Browser ─► Routes (auth) ─► 3 Controllers ─► Form Requests (validation)
+                                 │
+                                 ▼
+                     3 Models + relationships ─► 4 tables
+                                 │
+                                 ▼
+                     Blade views + components ─► HTML
+```
+
+### Models and relationships
+
+| Model | Table | Relationships |
 |---|---|---|
-| A | Migrations (4 tables), models, relationships, factories | ⏳ |
-| B | Manage routines: CRUD for items and sub-tasks (Form Requests), deactivate | ⏳ |
-| C | Create this week's sheet (copy last week) + edit sheet items (`sync()`) | ⏳ |
-| D | Week sheet grid: rows, 7 days, computed parent status, locked future days | ⏳ |
-| E | Tick / untick (rules 3–5) | ⏳ |
-| F | Day view + progress | ⏳ |
-| G | Old weeks list + read-only sheet | ⏳ |
-| H | "Daily Routine" in the navigation | ⏳ |
-| I | Feature tests for every rule | ⏳ |
+| `Routine` | `routines` | `parent()` belongsTo Routine · `children()` hasMany Routine · `checks()` hasMany RoutineCheck · `weeks()` belongsToMany RoutineWeek |
+| `RoutineWeek` | `routine_weeks` | `routines()` belongsToMany Routine (pivot `routine_week_items`) |
+| `RoutineCheck` | `routine_checks` | `routine()` belongsTo Routine |
+| — | `routine_week_items` | pivot, **no model** — managed with `attach` / `detach` / `sync` |
+
+### Controllers — one per resource
+
+| Controller | Resource | Methods |
+|---|---|---|
+| `RoutineController` | a routine item (+ sub-tasks) | `index`, `create`, `store`, `edit`, `update`, `destroy` (= deactivate) |
+| `RoutineWeekController` | a weekly sheet | `current`, `index` (old weeks), `store` (copy last week), `show` (grid + `?day=`), `edit`, `update` |
+| `RoutineCheckController` | a tick | `store` (tick), `destroy` (untick) |
+
+### Form Requests
+
+| Request | Checks |
+|---|---|
+| `StoreRoutineRequest` / `UpdateRoutineRequest` | name required · time `H:i` · `parent_id` must be an active **top-level** routine (one level deep) |
+| `UpdateRoutineWeekRequest` | `routine_ids[]` exist, active, top-level |
+| `StoreRoutineCheckRequest` | `done_on` ≤ today and inside the current week · routine is a **leaf** · routine is on that week's sheet · not already ticked that day |
+
+### Where the logic lives (thin controllers)
+
+| Logic | Place |
+|---|---|
+| Only active / only top-level | scopes `Routine::active()`, `Routine::topLevel()` |
+| Has no sub-tasks? | `Routine::isLeaf()` |
+| Parent status on a day (done / partly / not) | `Routine::statusOn($date)` — computed from children's checks |
+| This week's sheet | `RoutineWeek::forDate($date)` — Carbon `startOfWeek(Carbon::MONDAY)` |
+| Create sheet from last week | `RoutineWeek::createFromPrevious()` → `sync()` |
+| Can this day be ticked? | `RoutineWeek::isEditableDay($date)` |
+
+### Views and components
+
+```text
+resources/views/
+├── routine-weeks/  show (grid + day view) · create-prompt · edit · index (old weeks)
+├── routines/       index (manage list + add form) · edit
+└── components/routines/  check-cell (one box) · progress ("2 / 3")
+```
+
+---
+
+## Development roadmap
+
+**How every step works (learning loop):** explain the concept → you type the code (or ask Claude to write it) → run it in the browser or Tinker → write/run tests → commit.
+**Git:** branch `feature/daily-routine` from `develop` · one commit per step · open a **Draft PR** after step A · mark **Ready for review** after step I.
+
+| Step | Status |
+|---|---|
+| A · Database | ⏳ |
+| B · Manage routines | ⏳ |
+| C · Weekly sheet: create & edit | ⏳ |
+| D · Week grid | ⏳ |
+| E · Tick / untick | ⏳ |
+| F · Day view + progress | ⏳ |
+| G · Old weeks | ⏳ |
+| H · Navigation | ⏳ |
+| I · Feature tests | ⏳ |
+
+### Step A · Database (migrations, models, relationships, factories)
+
+- **Commands** (on the host, in this order — foreign keys need their tables first):
+  ```bash
+  php artisan make:model Routine -mf
+  php artisan make:model RoutineWeek -mf
+  php artisan make:migration create_routine_week_items_table
+  php artisan make:model RoutineCheck -mf
+  docker compose exec app php artisan migrate
+  ```
+- **Files:** 4 migrations · `Routine`, `RoutineWeek`, `RoutineCheck` models (fillable, casts, relationships) · 3 factories (states: `subTask()`, `inactive()`)
+- **Learn:** `foreignId()->constrained()->cascadeOnDelete()` · self-referencing foreign key · pivot table with a composite primary key · composite `unique()` · `hasMany` / `belongsTo` / `belongsToMany` · `boolean` and `date` casts
+- **Done when:** `migrate` runs; in Tinker `$routine->children`, `$week->routines`, `$check->routine` work
+- **Commit:** `feat(routine): tables, models and relationships`
+
+### Step B · Manage routines (CRUD + sub-tasks)
+
+- **Files:** `RoutineController` (resource) · `StoreRoutineRequest`, `UpdateRoutineRequest` · `routines/index`, `routines/edit` · route `Route::resource('routines', …)->except(['show'])`
+- **Learn:** query scopes (`active()`, `topLevel()`) · validation with `Rule::exists(...)->where(...)` · `<select>` filled from the database · deactivate instead of delete
+- **Done when:** add a routine, add sub-tasks under it, edit, deactivate / activate
+- **Commit:** `feat(routine): manage routines and sub-tasks`
+
+### Step C · Weekly sheet: create and edit
+
+- **Files:** `RoutineWeekController@current`, `store`, `edit`, `update` · `UpdateRoutineWeekRequest` · `routine-weeks/create-prompt`, `routine-weeks/edit`
+- **Learn:** Carbon weeks (`startOfWeek(Carbon::MONDAY)`) · `firstOrCreate` · `belongsToMany` `sync()` / `attach()` · copying data from the previous record · redirect logic
+- **Done when:** `/daily-routine` shows "Create this week's sheet" → creates it with last week's routines → edit adds / removes routines
+- **Commit:** `feat(routine): create and edit weekly sheets`
+
+### Step D · Week grid
+
+- **Files:** `RoutineWeekController@show` · `routine-weeks/show` · `components/routines/check-cell`
+- **Learn:** **eager loading** (`with()` + constrained eager loads) and the **N+1 problem** · `CarbonPeriod` for the 7 days · computed status (`statusOn()`) · Blade components with props
+- **Done when:** the grid matches the mockup; future days locked; parent shows done / partly / not; page runs a fixed number of queries
+- **Commit:** `feat(routine): weekly sheet grid`
+
+### Step E · Tick / untick
+
+- **Files:** `RoutineCheckController@store`, `destroy` · `StoreRoutineCheckRequest` · routes `Route::resource('routine-checks', …)->only(['store', 'destroy'])`
+- **Learn:** date validation (`before_or_equal:today`, `after_or_equal:<monday>`) · Form Request `after()` checks · unique constraint as the last line of defence
+- **Done when:** ticking a leaf creates a row; unticking deletes it; parents, future days and old weeks are blocked (also via curl)
+- **Commit:** `feat(routine): tick and untick routines`
+
+### Step F · Day view and progress
+
+- **Files:** `show` with `?day=` · progress component
+- **Learn:** reading query strings (`$request->date('day')`) · collection methods (`filter`, `count`, `groupBy`)
+- **Done when:** clicking a day shows "2 of 3 done" with each routine's status
+- **Commit:** `feat(routine): day view and progress`
+
+### Step G · Old weeks
+
+- **Files:** `RoutineWeekController@index` · `routine-weeks/index` · read-only mode in `show`
+- **Learn:** pagination (`paginate()`) · ordering by date · showing / hiding actions by state
+- **Done when:** old weeks are listed and open read-only
+- **Commit:** `feat(routine): old weeks list`
+
+### Step H · Navigation
+
+- **Files:** `layouts/navigation.blade.php` (desktop + mobile)
+- **Learn:** `request()->routeIs([...])` with several patterns
+- **Done when:** "Daily Routine" is in the menu and highlighted on all routine pages
+- **Commit:** `feat(routine): navigation link`
+
+### Step I · Feature tests
+
+- **Files:** `tests/Feature/Routine/…` (one file per controller)
+- **Learn:** factories with relationships (`has()`, `for()`) · `travelTo()` to fix "today" · `assertDatabaseHas` on a pivot · testing unique constraints
+- **Done when:** every business rule has a test; CI green including SonarCloud coverage
+- **Commit:** `test(routine): feature tests` → PR **Ready for review** → merge to `develop` → release to `main`
 
 ---
 

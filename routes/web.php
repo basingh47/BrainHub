@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\DailyTaskController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoutineCheckController;
+use App\Http\Controllers\RoutineWeekController;
 use Illuminate\Support\Facades\Route;
 
 // Home → sign-up page. Logged-in users are sent on to the dashboard by the 'guest' middleware on /register.
@@ -20,6 +22,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/daily-tasks/{daily_task}/complete', [DailyTaskController::class, 'complete'])->name('daily-tasks.complete');
     Route::patch('/daily-tasks/{daily_task}/reopen', [DailyTaskController::class, 'reopen'])->name('daily-tasks.reopen');
     Route::resource('daily-tasks', DailyTaskController::class)->except(['show']);
+
+    // Daily Routine: menu link → this week's sheet; a sheet is addressed by its Monday's date.
+    Route::get('/daily-routine', [RoutineWeekController::class, 'current'])->name('daily-routine');
+    Route::get('/routine-weeks/{date}', [RoutineWeekController::class, 'show'])
+        ->where('date', '\d{4}-\d{2}-\d{2}')
+        ->name('routine-weeks.show');
+    // Tick = POST (create a row), untick = DELETE (remove the row).
+    Route::resource('routine-checks', RoutineCheckController::class)->only(['store', 'destroy']);
+
 });
 
 require __DIR__.'/auth.php';

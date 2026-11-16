@@ -18,6 +18,10 @@
                     <x-nav-link :href="route('daily-tasks.index')" :active="request()->routeIs('daily-tasks.*')">
                         {{ __('Daily Tasks') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('daily-routine')" :active="request()->routeIs(['daily-routine', 'routine-weeks.*', 'routines.*'])">
+                        {{ __('Daily Routine') }}
+                    </x-nav-link>
+
                 </div>
             </div>
 
@@ -76,6 +80,10 @@
             <x-responsive-nav-link :href="route('daily-tasks.index')" :active="request()->routeIs('daily-tasks.*')">
                 {{ __('Daily Tasks') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('daily-routine')" :active="request()->routeIs(['daily-routine', 'routine-weeks.*', 'routines.*'])">
+                {{ __('Daily Routine') }}
+            </x-responsive-nav-link>
+
         </div>
 
         <!-- Responsive Settings Options -->
