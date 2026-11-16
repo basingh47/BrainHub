@@ -7,7 +7,7 @@ Version 1 is limited to **three pages**. Each page has its own plan document.
 | # | Page | Purpose | Plan | Status |
 |---|---|---|---|---|
 | 1 | Daily Tasks | Create, track, complete and reschedule one-off tasks | [01-daily-tasks.md](01-daily-tasks.md) | ✅ Released (v1) |
-| 2 | Daily Routine | Weekly sheet of repeating routines (with sub-tasks), tick per day | [02-daily-routine.md](02-daily-routine.md) | ⏳ Not started |
+| 2 | Daily Routine | Weekly sheet of repeating routines (with sub-tasks), tick per day | [02-daily-routine.md](02-daily-routine.md) | 🚧 In progress |
 | 3 | Dashboard | Read-only summary of today (tasks + routine) | [03-dashboard.md](03-dashboard.md) | ⏳ Not started |
 
 ---
