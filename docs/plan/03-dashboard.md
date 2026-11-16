@@ -11,7 +11,7 @@ A read-only overview of today: task progress, overdue work and routine progress,
 - As a user, I see a greeting and today's date when I open the app.
 - As a user, I see today's task counts and overdue count at a glance.
 - As a user, I see a short list of today's tasks.
-- As a user, I see my morning and evening routine progress.
+- As a user, I see today's routine progress.
 - As a user, I can jump to add a task or open the routine page.
 
 ---
@@ -25,7 +25,7 @@ Page: `/dashboard` (replaces the current Breeze placeholder)
 | Greeting | "Good morning/afternoon/evening", today's date |
 | Task summary cards | Total today · Completed · Pending · Overdue |
 | Today's tasks | Short list (title + status badge), link "View all" → Daily Tasks |
-| Routine progress | Morning X / Y · Evening X / Y (progress bars), link → Daily Routine |
+| Routine progress | Today X / Y (progress bar from this week's sheet), link → Daily Routine |
 | Quick actions | + Add task · Open routine |
 
 Editing never happens here — buttons link to the owning page.
@@ -39,7 +39,7 @@ The Dashboard **owns no tables** and has **no forms**.
 | Widget | Reads from |
 |---|---|
 | Task summary, today's tasks, overdue | `daily_tasks` (same query scopes as the Daily Tasks page) |
-| Routine progress | `routines` + `routine_completions` for today |
+| Routine progress | this week's `routine_weeks` sheet + `routine_checks` for today |
 
 Reuse, don't duplicate: model query scopes (e.g. `dueOn($date)`, `overdue()`) and Blade components (`status-badge`, `stat-card`) built for the other pages.
 
