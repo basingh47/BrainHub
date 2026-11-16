@@ -6,8 +6,8 @@ Version 1 is limited to **three pages**. Each page has its own plan document.
 
 | # | Page | Purpose | Plan | Status |
 |---|---|---|---|---|
-| 1 | Daily Tasks | Create, track, complete and reschedule one-off tasks | [01-daily-tasks.md](01-daily-tasks.md) | 🚧 In progress |
-| 2 | Daily Routine | Track repeating morning/evening habits per day | [02-daily-routine.md](02-daily-routine.md) | ⏳ Not started |
+| 1 | Daily Tasks | Create, track, complete and reschedule one-off tasks | [01-daily-tasks.md](01-daily-tasks.md) | ✅ Released (v1) |
+| 2 | Daily Routine | Weekly sheet of repeating routines (with sub-tasks), tick per day | [02-daily-routine.md](02-daily-routine.md) | ⏳ Not started |
 | 3 | Dashboard | Read-only summary of today (tasks + routine) | [03-dashboard.md](03-dashboard.md) | ⏳ Not started |
 
 ---
@@ -32,7 +32,7 @@ Daily Tasks ──► Daily Routine ──► Dashboard
 | Ownership | **Single user** — no `user_id` columns in v1 | Keep v1 simple; multi-user is a later migration |
 | Controllers | Resource controllers only (`Route::resource`) | Predictable REST structure; extra actions = `update` via PATCH |
 | Validation | Form Request classes (`Store…Request`, `Update…Request`) | Keeps controllers thin |
-| Fixed choices | PHP Enums (status, priority, category, period) | No magic strings, typo-safe |
+| Fixed choices | PHP Enums (status, priority, category) | No magic strings, typo-safe |
 | Views | `resources/views/<feature>/`, components in `components/<feature>/` | One folder per feature |
 | Tests | Feature tests per resource in `tests/Feature/<Feature>/` | Every page ships with tests |
 
@@ -54,8 +54,10 @@ Add/edit forms belong to their page; they are not separate menu items.
 |---|---|---|
 | `users` | Breeze | Login accounts |
 | `daily_tasks` | Daily Tasks | One-off tasks and their status |
-| `routines` | Daily Routine | Reusable routine items (e.g. "Exercise") |
-| `routine_completions` | Daily Routine | One row per routine item completed on a date |
+| `routines` | Daily Routine | Reusable routine items and sub-tasks (e.g. "Exercise" → "2 km run") |
+| `routine_weeks` | Daily Routine | One weekly sheet (starts Monday) |
+| `routine_week_items` | Daily Routine | Which routines are on which weekly sheet |
+| `routine_checks` | Daily Routine | One row per routine ticked on a date |
 
 The Dashboard owns **no tables**.
 
