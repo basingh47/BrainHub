@@ -118,9 +118,12 @@ class DailyTaskController extends Controller
     {
         $task = DailyTask::findOrFail($id);
 
-        $task->update(['due_date' => $request->validated('due_date')]);
+        // $request->date() returns the validated input as a Carbon date.
+        $newDate = $request->date('due_date');
 
-        return $this->backToList('info', "“{$task->title}” moved to {$task->due_date->format('D j M')}.");
+        $task->update(['due_date' => $newDate]);
+
+        return $this->backToList('info', "“{$task->title}” moved to {$newDate->format('D j M')}.");
     }
 
     /**
