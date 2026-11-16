@@ -23,6 +23,8 @@ services:
       SESSION_DRIVER: database
       CACHE_STORE: database
       QUEUE_CONNECTION: database
+      # Write logs to storage/logs/laravel.log (the Dockerfile sets stderr, which Render needs).
+      LOG_CHANNEL: stack
       # ── LOCAL DEV MODE (this file is skip-worktree: never committed) ──
       # PHP re-reads edited files on every request (production keeps them in memory).
       PHP_OPCACHE_ENABLE: "0"
