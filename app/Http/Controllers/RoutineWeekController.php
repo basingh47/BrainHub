@@ -7,8 +7,11 @@ use App\Models\RoutineCheck;
 use App\Models\RoutineWeek;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Throwable;
 
@@ -20,6 +23,35 @@ class RoutineWeekController extends Controller
     public function current(): RedirectResponse
     {
         return redirect()->route('routine-weeks.show', today()->startOfWeek()->toDateString());
+    }
+
+    /**
+     * "Create this week's sheet": copy the previous sheet's routines that are still active.
+     * First sheet ever (nothing to copy) → all active top-level routines.
+     */
+    public function store(): RedirectResponse
+    {
+        // The server decides the week — never a date sent by the browser.
+        $monday = today()->startOfWeek();
+
+        // Double-click or a second tab: the sheet already exists → just show it.
+        if (RoutineWeek::forDate($monday)) {
+            return redirect()->route('routine-weeks.show', $monday->toDateString());
+        }
+
+        $previous = RoutineWeek::previousBefore($monday);
+
+        $routineIds = $previous
+            ? $previous->routines()->where('is_active', true)->pluck('routines.id')
+            : Routine::whereNull('parent_id')->where('is_active', true)->pluck('id');
+
+        // Both writes succeed together or not at all.
+        DB::transaction(function () use ($monday, $routineIds) {
+            RoutineWeek::create(['week_start' => $monday])->routines()->attach($routineIds);
+        });
+
+        return redirect()->route('routine-weeks.show', $monday->toDateString())
+            ->with('flash', ['type' => 'success', 'message' => "This week's sheet was created with {$routineIds->count()} routines."]);
     }
 
     /**
@@ -82,6 +114,7 @@ class RoutineWeekController extends Controller
             'previousWeek' => $monday->copy()->subWeek()->toDateString(),
             'nextWeek' => $monday->copy()->addWeek()->toDateString(),
             'isCurrentWeek' => $monday->isSameDay(today()->startOfWeek()),
+            'date' => $monday->toDateString(),  // for the "Edit sheet" link
         ]);
     }
 
@@ -124,5 +157,55 @@ class RoutineWeekController extends Controller
             // Parents show how many sub-tasks are done, e.g. "2/3".
             'progress' => $isLeaf ? null : $routine->doneChildrenOn($day).'/'.$routine->children->count(),
         ];
+    }
+
+    /**
+     * Edit sheet: checkbox list of routines. (Design step: the view still uses fake data.)
+     */
+    public function edit(string $date): View
+    {
+        $monday = Carbon::parse($date)->startOfWeek();
+
+        // Only this week's sheet can be edited (old weeks are history), and it must exist.
+        abort_unless($monday->isSameDay(today()->startOfWeek()), 403);
+        $week = RoutineWeek::forDate($monday) ?? abort(404);
+
+        $selectedIds = $week->routines()->pluck('routines.id')->all();
+
+        // Active top-level routines + any routine already on the sheet (so saving never drops it silently).
+        $routines = Routine::whereNull('parent_id')
+            ->where(fn ($query) => $query->where('is_active', true)->orWhereIn('id', $selectedIds))
+            ->with('children')
+            ->orderByRaw('target_time IS NULL')
+            ->orderBy('target_time')
+            ->orderBy('sort_order')
+            ->get();
+
+        return view('routine-weeks.edit', [
+            'date' => $monday->toDateString(),
+            'weekLabel' => $monday->format('j').' – '.$monday->copy()->endOfWeek()->format('j M Y'),
+            'routines' => $routines,
+            'selectedIds' => $selectedIds,
+        ]);
+    }
+
+    public function update(Request $request, string $date): RedirectResponse
+    {
+        $monday = Carbon::parse($date)->startOfWeek();
+
+        // Same rules as edit(): only this week, and the sheet must exist.
+        abort_unless($monday->isSameDay(today()->startOfWeek()), 403);
+        $week = RoutineWeek::forDate($monday) ?? abort(404);
+
+        // Never trust the form: only existing top-level routines can go on a sheet.
+        $validated = $request->validate([
+            'routine_ids' => ['array'],
+            'routine_ids.*' => ['integer', Rule::exists('routines', 'id')->whereNull('parent_id')],
+        ]);
+
+        $week->routines()->sync($validated['routine_ids'] ?? []);
+
+        return redirect()->route('routine-weeks.show', $monday->toDateString())
+            ->with('flash', ['type' => 'success', 'message' => 'Sheet updated.']);
     }
 }
