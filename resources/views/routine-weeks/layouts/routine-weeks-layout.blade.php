@@ -10,11 +10,11 @@
 
             <div class="flex flex-wrap gap-2">
                 {{-- href="#" for now: these routes are built in steps B and C --}}
-                <a href="#"
+                <a href="{{ route('routine-weeks.edit', $date) }}"
                    class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
                     Edit sheet
                 </a>
-                <a href="#"
+                <a href="{{ route('routines.index') }}"
                    class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
                     Manage routines
                 </a>

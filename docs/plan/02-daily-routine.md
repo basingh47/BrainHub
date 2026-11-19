@@ -1,6 +1,6 @@
 # 2️⃣ Daily Routine
 
-**Status:** 🚧 In progress (planning done) · **Branch:** `feature/daily-routine` · **Depends on:** Daily Tasks done
+**Status:** 🚧 In progress — grid, ticks and navigation released; manage routines + create/edit sheet being built · **Branch:** `feature/routine-manage` (steps A, D, E, H merged via `feature/daily-routine`) · **Depends on:** Daily Tasks done
 
 ## Goal
 
@@ -133,14 +133,20 @@ Checks are stored only for **leaf** items (routines with no sub-tasks).
 
 | Action | HTTP | URL | Method |
 |---|---|---|---|
-| Entry point → this week (nav link) | GET | `/daily-routine` | `RoutineWeekController@current` |
-| Old weeks list | GET | `/routine-weeks` | `RoutineWeekController@index` |
-| Create this week's sheet (copy last week) | POST | `/routine-weeks` | `RoutineWeekController@store` |
-| Week sheet (+ `?day=` day view) | GET | `/routine-weeks/{week}` | `RoutineWeekController@show` |
-| Edit sheet items | GET / PUT | `/routine-weeks/{week}/edit` · `/routine-weeks/{week}` | `edit` · `update` |
-| Manage routines | resource | `/routines` | `RoutineController` (`index`, `create`, `store`, `edit`, `update`, `destroy`) |
-| Tick | POST | `/routine-checks` | `RoutineCheckController@store` |
-| Untick | DELETE | `/routine-checks/{check}` | `RoutineCheckController@destroy` |
+A sheet is addressed by its **Monday's date** (`{date}` = `YYYY-MM-DD`), not by its id.
+
+| Action | HTTP | URL | Method | Built |
+|---|---|---|---|---|
+| Entry point → this week (nav link) | GET | `/daily-routine` | `RoutineWeekController@current` | ✅ |
+| Week sheet | GET | `/routine-weeks/{date}` | `RoutineWeekController@show` | ✅ |
+| Create this week's sheet (copy last sheet) | POST | `/routine-weeks` (no date: the server uses this Monday) | `RoutineWeekController@store` | ✅ |
+| Edit sheet items | GET / PATCH | `/routine-weeks/{date}/edit` · `/routine-weeks/{date}` | `edit` · `update` | ✅ |
+| Day view | GET | `/routine-weeks/{date}?day=` (or `/days/{day}`) | `show` | ⏳ |
+| Old weeks list | GET | `/routine-weeks` | `RoutineWeekController@index` | ⏳ |
+| Manage routines | resource | `/routines` (except `show`, `create`: the add form is on the list page) | `RoutineController` (`index`, `store`, `edit`, `update`, `destroy`) | 🟡 |
+| Deactivate / activate a routine | PATCH | `/routines/{routine}/deactivate` · `/activate` | `deactivate` · `activate` | ✅ |
+| Tick | POST | `/routine-checks` | `RoutineCheckController@store` | ✅ |
+| Untick | DELETE | `/routine-checks/{routine_check}` | `RoutineCheckController@destroy` | ✅ |
 
 ---
 
@@ -229,15 +235,36 @@ resources/views/
 
 | Step | Status |
 |---|---|
-| A · Database | ⏳ |
-| B · Manage routines | ⏳ |
-| C · Weekly sheet: create & edit | ⏳ |
-| D · Week grid | ⏳ |
-| E · Tick / untick | ⏳ |
-| F · Day view + progress | ⏳ |
-| G · Old weeks | ⏳ |
-| H · Navigation | ⏳ |
-| I · Feature tests | ⏳ |
+| A · Database | ✅ Released |
+| B · Manage routines | 🟡 Pages work · validation and clean-up left |
+| C · Weekly sheet: create & edit | 🟡 Create + edit work · polish left |
+| D · Week grid | ✅ Released |
+| E · Tick / untick | ✅ Released |
+| F · Day view + progress | ⏳ Not started |
+| G · Old weeks | 🟡 Previous / next week + read-only done · list page left |
+| H · Navigation | ✅ Released |
+| I · Feature tests | 🟡 24 tests for D + E · B and C need tests |
+
+### What is left (current branch `feature/routine-manage`)
+
+**Step B · Manage routines** — done: list page (table + add form), edit page, activate / deactivate.
+- [ ] `index()`: query top-level routines `with('children')` sorted by time (now `Routine::all()` → sub-tasks shown twice + N+1); "Part of" options only **active** top-level routines.
+- [ ] `StoreRoutineRequest` / `UpdateRoutineRequest`: name required, time `H:i`, parent must be an active **top-level** routine (rule 8); use `validated()` instead of `$request->all()`; flash "Routine added / updated".
+- [ ] Sub-task **Remove** (`destroy`): decide the rule — suggested: delete only if never ticked, otherwise refuse; top-level routines are never deleted (403).
+- [ ] Show times as `HH:MM` (DB gives `06:00:00`).
+- [ ] Clean-up: delete unused `create()` / `show()`, add return types, run Pint (import order, indentation).
+
+**Step C · Create & edit sheet** — done: "Create this week's sheet" (copies the previous sheet's active routines; first sheet ever = all active routines; double-click safe; transaction), edit page with checkboxes, `update()` with `sync()`.
+- [ ] Preview in the create box: "3 routines will be copied: …".
+- [ ] Hide the **Edit sheet** button when the week has no sheet or is an old week.
+- [ ] A bad date in `edit` / `update` URLs gives 500 → one `weekOf($date)` helper (parse + `startOfWeek` + 404); share the week label with `show()`.
+- [ ] Move the `routine_ids` rules into `UpdateRoutineWeekRequest`.
+
+**Step I · Tests** for B and C (copy rules, inactive skipped, first sheet, double-click, `sync`, old week 403, validation).
+
+**Project fix:** `phpunit.xml` needs `force="true"` on `APP_ENV`, `DB_CONNECTION`, `DB_DATABASE`, `DB_URL` — without it, `php artisan test` inside the Docker container runs on the real local MySQL and wipes it.
+
+**Then:** commit → PR to `develop` → step F (day view) and G (old weeks list).
 
 ### Step A · Database (migrations, models, relationships, factories)
 
@@ -314,14 +341,14 @@ resources/views/
 
 ## Acceptance criteria
 
-- [ ] Routine items and sub-tasks can be created, edited and deactivated.
-- [ ] This week's sheet can be created from last week and its items changed.
-- [ ] Today and earlier days of this week can be ticked/unticked; future days and old weeks cannot.
-- [ ] A parent shows done only when all its sub-tasks are done that day.
+- [ ] Routine items and sub-tasks can be created, edited and deactivated. *(works; validation left)*
+- [x] This week's sheet can be created from last week and its items changed.
+- [x] Today and earlier days of this week can be ticked/unticked; future days and old weeks cannot.
+- [x] A parent shows done only when all its sub-tasks are done that day.
 - [ ] The day view shows what was completed on that date.
-- [ ] Old weeks can be opened read-only.
-- [ ] A routine cannot be ticked twice on the same day.
-- [ ] Feature tests pass in CI.
+- [x] Old weeks can be opened read-only. *(via previous / next week; list page left)*
+- [x] A routine cannot be ticked twice on the same day.
+- [ ] Feature tests pass in CI. *(D + E covered; B + C left)*
 
 ## Out of scope (v1)
 
