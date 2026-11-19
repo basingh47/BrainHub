@@ -18,6 +18,9 @@
             @endif
         </nav>
 
+        {{-- Success messages, e.g. "This week's sheet was created with 3 routines." --}}
+        <x-flash />
+
         {{-- Tick errors (e.g. "You cannot tick a future day.") come back here after the redirect --}}
         @if ($errors->any())
             <div role="alert" class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -31,11 +34,27 @@
                 <h3 class="text-lg font-semibold text-gray-900">No sheet for this week</h3>
                 <p class="mt-1 text-sm text-gray-600">
                     @if ($isCurrentWeek)
-                        Creating this week's sheet comes in the next step.
+                        Create it from last week's sheet. You can add or remove routines next.
                     @else
                         No routines were tracked this week.
                     @endif
                 </p>
+
+                {{-- Only this week can get a new sheet; old weeks stay as history --}}
+                @if ($isCurrentWeek)
+                    {{-- POST /routine-weeks → RoutineWeekController@store (no date sent: the server uses this Monday) --}}
+                    <form method="POST" action="{{ route('routine-weeks.store') }}" class="mt-4">
+                        @csrf
+                        <button type="submit"
+                                class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+                            Create this week's sheet
+                        </button>
+                    </form>
+
+                    <a href="{{ route('routines.index') }}" class="mt-3 block text-sm font-semibold text-indigo-700 hover:underline">
+                        or add new routines first →
+                    </a>
+                @endif
             </section>
         @else
             <section class="overflow-x-auto rounded-lg border border-gray-200 bg-white">

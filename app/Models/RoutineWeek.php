@@ -53,6 +53,15 @@ class RoutineWeek extends Model
     }
 
     /**
+     * The newest sheet BEFORE the week of $monday, or null if there is none.
+     * Not "exactly last week": the user may have skipped weeks.
+     */
+    public static function previousBefore(CarbonInterface $monday): ?self
+    {
+        return static::whereDate('week_start', '<', $monday)->orderByDesc('week_start')->first();
+    }
+
+    /**
      * Can boxes on this day be ticked / unticked? (plan rule 3)
      * Only days of the CURRENT week, up to today. Future days and old weeks: no.
      */
