@@ -40,14 +40,14 @@ class RoutineWeekSheetTest extends TestCase
     {
         $this->actingAs($this->user)
             ->get(route('routine-weeks.show', '2026-11-16'))
-            ->assertSee("Create this week's sheet");
+            ->assertSee("Create this week's sheet", false);   // false = compare raw HTML (the ' is not escaped in the page)
     }
 
     public function test_old_week_without_a_sheet_has_no_create_button(): void
     {
         $this->actingAs($this->user)
             ->get(route('routine-weeks.show', '2026-11-02'))
-            ->assertDontSee("Create this week's sheet");
+            ->assertDontSee("Create this week's sheet", false);
     }
 
     public function test_create_copies_the_previous_sheets_active_routines(): void
