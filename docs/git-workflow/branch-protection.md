@@ -2,19 +2,20 @@
 
 ## Purpose
 
-The `main` branch represents the production-ready version of the project.
+The `main` branch represents the production-ready version of the project (every merge deploys to Render). `develop` holds the next release.
 
-These rules help ensure that only reviewed and validated code is merged into `main`, reducing the risk of introducing broken or insecure changes.
+These rules help ensure that only reviewed and validated code is merged into either branch, reducing the risk of introducing broken or insecure changes. The day-to-day flow (feature → `develop` → release to `main`) is in [pull-requests.md](pull-requests.md).
 
 ---
 
-## Protected Branch
+## Protected Branches
 
 ```
 main
+develop
 ```
 
-Rules are set as a GitHub **ruleset** (Settings → Rules). A rejected push shows `GH013: Repository rule violations found for refs/heads/main`.
+Both use the same rules below. Rules are set as a GitHub **ruleset** (Settings → Rules). A rejected push shows `GH013: Repository rule violations found for refs/heads/<branch>`.
 
 ---
 

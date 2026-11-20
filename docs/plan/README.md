@@ -27,7 +27,7 @@ Daily Tasks ──► Daily Routine ──► Dashboard
 
 | Area | Decision | Why |
 |---|---|---|
-| Stack | Laravel 12, PHP 8.4, MySQL, Blade, Tailwind CSS, Alpine.js | Tailwind + Alpine already installed by Breeze |
+| Stack | Laravel 13, PHP 8.4, MySQL, Blade, Tailwind CSS, Alpine.js | Tailwind + Alpine already installed by Breeze |
 | Access | All pages behind the `auth` middleware | App is public on Render; Breeze login already exists |
 | Ownership | **Single user** — no `user_id` columns in v1 | Keep v1 simple; multi-user is a later migration |
 | Controllers | Resource controllers only (`Route::resource`) | Predictable REST structure; extra actions = `update` via PATCH |
