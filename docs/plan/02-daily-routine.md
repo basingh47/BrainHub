@@ -1,6 +1,6 @@
 # 2️⃣ Daily Routine
 
-**Status:** 🚧 In progress — grid, ticks and navigation released; manage routines + create/edit sheet being built · **Branch:** `feature/routine-manage` (steps A, D, E, H merged via `feature/daily-routine`) · **Depends on:** Daily Tasks done
+**Status:** 🚧 In progress — released to `main`: database, weekly grid, tick / untick, navigation (PRs #21 → #22), manage routines + create / edit sheet (PRs #23 → #24). Next: polish of steps B / C, day view (F), old-weeks list (G) · **Depends on:** Daily Tasks done
 
 ## Goal
 
@@ -19,16 +19,14 @@ Track repeating routines (e.g. "Wake up at 6:00", "Exercise") on a **weekly shee
 
 ## UI
 
-**Mockups** (open the `.html` files in a browser; screens link to each other): [`02-daily-routine-mockups/`](02-daily-routine-mockups/)
+The original mockup files were removed from the repo (still in git history before PR #23: `docs/plan/02-daily-routine-mockups/`). The screens are described below; the built pages are the reference now.
 
-| Screen | Image | Page |
+| Screen | URL | Status |
 |---|---|---|
-| Week sheet | [week-sheet.png](02-daily-routine-mockups/week-sheet.png) | [week-sheet.html](02-daily-routine-mockups/week-sheet.html) |
-| Day view | [day-view.png](02-daily-routine-mockups/day-view.png) | [day-view.html](02-daily-routine-mockups/day-view.html) |
-| Create & edit sheet | [create-edit-sheet.png](02-daily-routine-mockups/create-edit-sheet.png) | [create-edit-sheet.html](02-daily-routine-mockups/create-edit-sheet.html) |
-| Manage routines | [manage-routines.png](02-daily-routine-mockups/manage-routines.png) | [manage-routines.html](02-daily-routine-mockups/manage-routines.html) |
-
-![Week sheet](02-daily-routine-mockups/week-sheet.png)
+| Week sheet | `/routine-weeks/{date}` | ✅ built |
+| Create & edit sheet | create box on the week sheet · `/routine-weeks/{date}/edit` | ✅ built |
+| Manage routines | `/routines` · `/routines/{routine}/edit` | ✅ built |
+| Day view | not built yet | ⏳ |
 
 ### Week sheet — `/routine-weeks/{week}`
 
@@ -243,9 +241,9 @@ resources/views/
 | F · Day view + progress | ⏳ Not started |
 | G · Old weeks | 🟡 Previous / next week + read-only done · list page left |
 | H · Navigation | ✅ Released |
-| I · Feature tests | 🟡 24 tests for D + E · B and C need tests |
+| I · Feature tests | 🟡 46 tests (grid, ticks, manage routines, create / edit sheet) · polish items below need tests too |
 
-### What is left (current branch `feature/routine-manage`)
+### What is left
 
 **Step B · Manage routines** — done: list page (table + add form), edit page, activate / deactivate.
 - [ ] `index()`: query top-level routines `with('children')` sorted by time (now `Routine::all()` → sub-tasks shown twice + N+1); "Part of" options only **active** top-level routines.
@@ -260,11 +258,11 @@ resources/views/
 - [ ] A bad date in `edit` / `update` URLs gives 500 → one `weekOf($date)` helper (parse + `startOfWeek` + 404); share the week label with `show()`.
 - [ ] Move the `routine_ids` rules into `UpdateRoutineWeekRequest`.
 
-**Step I · Tests** for B and C (copy rules, inactive skipped, first sheet, double-click, `sync`, old week 403, validation).
+**Step I · Tests** — done for what is built (`RoutineTest`, `RoutineWeekSheetTest`: copy rules, inactive skipped, first sheet, double-click, `sync`, old week 403). Add tests with each polish item above.
 
-**Project fix:** `phpunit.xml` needs `force="true"` on `APP_ENV`, `DB_CONNECTION`, `DB_DATABASE`, `DB_URL` — without it, `php artisan test` inside the Docker container runs on the real local MySQL and wipes it.
+**Project fix:** ✅ done — `phpunit.xml` forces SQLite with `<server>` + `force="true"`, so tests never touch MySQL, even inside Docker.
 
-**Then:** commit → PR to `develop` → step F (day view) and G (old weeks list).
+**Then:** step F (day view) and G (old weeks list), each on its own feature branch → PR to `develop` → release to `main`.
 
 ### Step A · Database (migrations, models, relationships, factories)
 
@@ -348,7 +346,7 @@ resources/views/
 - [ ] The day view shows what was completed on that date.
 - [x] Old weeks can be opened read-only. *(via previous / next week; list page left)*
 - [x] A routine cannot be ticked twice on the same day.
-- [ ] Feature tests pass in CI. *(D + E covered; B + C left)*
+- [x] Feature tests pass in CI. *(for everything built so far; F and G will need their own)*
 
 ## Out of scope (v1)
 
