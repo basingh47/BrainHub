@@ -1,42 +1,16 @@
 # Local only — Render does NOT read this file.
 # Builds the root Dockerfile (NGINX + PHP-FPM + Vite assets).
-# Compose adds MySQL + env for local smoke tests. No .env file required.
+# Single source of settings: .env (copy .env.example → .env first).
+#   - app:   gets every .env line as a real environment variable (env_file)
+#   - mysql: ${DB_...} below are filled in from .env by Docker Compose
 
 services:
   app:
     build: .
     ports:
       - "8080:8080"
-    environment:
-      APP_NAME: BrainHub
-      APP_ENV: local
-      APP_DEBUG: "true"
-      # Local-only key (32 bytes). Not used by Render. Safe to commit for learning.
-      APP_KEY: base64:YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
-      APP_URL: http://localhost:8080
-      DB_CONNECTION: mysql
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_DATABASE: brainhub
-      DB_USERNAME: brainhub
-      DB_PASSWORD: secret
-      SESSION_DRIVER: database
-      CACHE_STORE: database
-      QUEUE_CONNECTION: database
-      # Write logs to storage/logs/laravel.log (the Dockerfile sets stderr, which Render needs).
-      LOG_CHANNEL: stack
-      # ── LOCAL DEV MODE (Render does not use this file) ──
-      # PHP re-reads edited files on every request (production keeps them in memory).
-      PHP_OPCACHE_ENABLE: "0"
-      # Skip all Laravel caching on start, so route/config/view changes show immediately.
-      # (OPTIMIZE=false alone falls back to per-cache switches, which default to true.)
-      AUTORUN_LARAVEL_OPTIMIZE: "false"
-      AUTORUN_LARAVEL_CONFIG_CACHE: "false"
-      AUTORUN_LARAVEL_ROUTE_CACHE: "false"
-      AUTORUN_LARAVEL_VIEW_CACHE: "false"
-      AUTORUN_LARAVEL_EVENT_CACHE: "false"
-      # Skip storage:link — www-data can't create the symlink in your mounted folder.
-      AUTORUN_LARAVEL_STORAGE_LINK: "false"
+    # All app settings (DB, APP_URL, PHP_OPCACHE_ENABLE, AUTORUN_*...) live in .env.
+    env_file: .env
     volumes:
       # Live code: the container reads your project folder instead of the copy baked into the image.
       - .:/var/www/html
@@ -56,17 +30,20 @@ services:
 
   mysql:
     image: mysql:8.0
+    # Same values Laravel uses, so the DB user always matches the app.
+    # Note: MySQL only applies these when the volume is created for the first time.
     environment:
-      MYSQL_DATABASE: brainhub
-      MYSQL_USER: brainhub
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: rootsecret
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
       - "3307:3306"
     volumes:
       - brainhub_mysql:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootsecret"]
+      # $$ = read the variable inside the container (not at compose time).
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
       interval: 5s
       timeout: 5s
       retries: 20
