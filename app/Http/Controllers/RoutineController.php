@@ -11,23 +11,18 @@ class RoutineController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $routines = Routine::all();
-        $parents = Routine::whereNull('parent_id')->get();
+        $routines = $request->user()->routines()          // ← only MY routines
+                                    ->whereNull('parent_id')
+                                    ->with('children')
+                                    ->get();
+        $parents = $routines->where('is_active', true);
 
         return view('routines.index', [
             'routines' => $routines,
             'parents' => $parents,
         ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -38,14 +33,6 @@ class RoutineController extends Controller
         $routine = Routine::create($request->all());
 
         return redirect()->route('routines.index');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Routine $routine)
-    {
-        //
     }
 
     /**
@@ -66,14 +53,6 @@ class RoutineController extends Controller
         $routine->update($request->all());
 
         return redirect()->route('routines.index');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Routine $routine)
-    {
-        //
     }
 
     /**

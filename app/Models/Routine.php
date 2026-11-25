@@ -112,4 +112,9 @@ class Routine extends Model
     {
         return $this->children->filter(fn (Routine $child) => $child->isDoneOn($day))->count();
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }
