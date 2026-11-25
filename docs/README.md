@@ -5,6 +5,8 @@
 | [architecture.md](architecture.md) | Stack, how code goes from PR to live, which file each tool uses, database |
 | [database-design.md](database-design.md) | Every table, its columns, and how the tables relate |
 | [roadmap.md](roadmap.md) | Version 1 checklist (project setup, auth, the three pages) |
+| **modules/** | |
+| [daily-routine.md](modules/daily-routine.md) | How the Daily Routine code works: pages, routes, controllers, models, tables, rules |
 | **plan/** | |
 | [README.md](plan/README.md) | v1 product plan: three pages, build order, shared decisions |
 | [01-daily-tasks.md](plan/01-daily-tasks.md) | Daily Tasks page: UI, data model, routes, rules, checklist |
