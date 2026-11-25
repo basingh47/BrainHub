@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Routine;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
 
 /**
  * @extends Factory<Routine>
@@ -18,6 +19,7 @@ class RoutineFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),  // Each routine belongs to a user
             'parent_id' => null,
             'name' => fake()->randomElement(['Wake up', 'Exercise', 'Read 20 min', 'Drink 2 L water', 'Meditate', 'Plan tomorrow']),
             'target_time' => fake()->optional()->time('H:i'),  // "06:30" or null
@@ -32,6 +34,7 @@ class RoutineFactory extends Factory
     public function subTaskOf(Routine $parent): static
     {
         return $this->state(fn () => [
+            'user_id' => $parent->user_id,
             'parent_id' => $parent->id,
             'target_time' => null,
         ]);
