@@ -6,7 +6,8 @@
 | [database-design.md](database-design.md) | Every table, its columns, and how the tables relate |
 | [roadmap.md](roadmap.md) | Version 1 checklist (project setup, auth, the three pages) |
 | **modules/** | |
-| [daily-routine.md](modules/daily-routine.md) | How the Daily Routine code works: pages, routes, controllers, models, tables, rules |
+| [daily-tasks.md](modules/daily-tasks.md) | How the Daily Tasks code works (simple module): pages, routes, controller, requests, model, table, tests, user-ownership checklist |
+| [daily-routine.md](modules/daily-routine.md) | How the Daily Routine code works, split into 3 sub-modules (Routines, Weekly sheet, Checks), with a user-ownership checklist for each |
 | **plan/** | |
 | [README.md](plan/README.md) | v1 product plan: three pages, build order, shared decisions |
 | [01-daily-tasks.md](plan/01-daily-tasks.md) | Daily Tasks page: UI, data model, routes, rules, checklist |
