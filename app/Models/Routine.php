@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\CarbonInterface;
 use Database\Factories\RoutineFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -82,7 +83,7 @@ class Routine extends Model
      */
     public function isDoneOn(CarbonInterface $day): bool
     {
-        return $this->checks->contains(fn (RoutineCheck $check) => $check->done_on->isSameDay($day));
+        return $this->checks->contains(fn(RoutineCheck $check) => $check->done_on->isSameDay($day));
     }
 
     /**
@@ -110,12 +111,38 @@ class Routine extends Model
      */
     public function doneChildrenOn(CarbonInterface $day): int
     {
-        return $this->children->filter(fn (Routine $child) => $child->isDoneOn($day))->count();
+        return $this->children->filter(fn(Routine $child) => $child->isDoneOn($day))->count();
     }
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
+
+
+
     
+
+    /**
+     * Accessor → virtual attribute $routine->short_time: "06:30:00" → "06:30" (null when no time).
+     */
+    protected function shortTime(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->target_time ? substr($this->target_time, 0, 5) : null
+        );
+    }
+
+    /** Used = on any weekly sheet or has any tick. Uses withCount() values when loaded. */
+    /**
+     * Accessor → $routine->is_used: true when the routine is on any weekly sheet or has any tick.
+     * Uses withCount() values when the controller loaded them (no extra query), else counts now.
+     */
+    protected function isUsed(): Attribute
+    {
+        return Attribute::get(
+            fn () => ($this->weeks_count ?? $this->weeks()->count()) > 0
+                || ($this->checks_count ?? $this->checks()->count()) > 0
+        );
+    }
 }

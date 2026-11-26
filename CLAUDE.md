@@ -19,6 +19,16 @@ Before asking for a yes, always show these 4 parts:
 
 4. **The code**: show it in chat with short comments, then ask: **"You type it, or I write it?"**
 
+## 1b. Always show the options, and prefer Laravel features
+
+Whenever there is **more than one way** to do something, **list the options before choosing**, even small ones. Example: a plain method vs an Eloquent **accessor** vs a cast vs a scope.
+
+| Option | How it works | Good for | Downsides |
+|---|---|---|---|
+
+- **Prefer the built-in Laravel feature** made for the job (accessor, cast, scope, Form Request, Policy, Resource, `withCount`, …) over a hand-made shortcut, because the developer is learning Laravel for interviews.
+- If you pick a simpler option on purpose, say so clearly: "The Laravel way is X; I'm using Y for now because …", so the developer never misses learning a feature.
+
 ## 2. After a code change
 
 - **What changed**: per file, before → after, in simple words.

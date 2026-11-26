@@ -16,6 +16,8 @@ class RoutineController extends Controller
         $routines = $request->user()->routines()          // ← only MY routines
             ->whereNull('parent_id')
             ->with('children')
+            ->orderBy('target_time')
+            ->withCount(['weeks', 'checks'])  // ← for isUsed() accessor
             ->get();
         $parents = $routines->where('is_active', true);
 
