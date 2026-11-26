@@ -14,9 +14,9 @@ class RoutineController extends Controller
     public function index(Request $request)
     {
         $routines = $request->user()->routines()          // ← only MY routines
-                                    ->whereNull('parent_id')
-                                    ->with('children')
-                                    ->get();
+            ->whereNull('parent_id')
+            ->with('children')
+            ->get();
         $parents = $routines->where('is_active', true);
 
         return view('routines.index', [

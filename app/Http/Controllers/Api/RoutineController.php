@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Routine;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class RoutineController extends Controller
 {
@@ -15,10 +14,11 @@ class RoutineController extends Controller
     public function index(Request $request)
     {
         $routines = $request->user()->routines()
-                                    ->whereNull('parent_id')
-                                    ->with('children')
-                                    ->get();
+            ->whereNull('parent_id')
+            ->with('children')
+            ->get();
         $parents = $routines->where('is_active', true);
+
         return response()->json([
             'routines' => $routines,
             'parents' => $parents,
