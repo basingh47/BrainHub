@@ -19,7 +19,7 @@ class RoutineController extends Controller
             ->get();
         $parents = $routines->where('is_active', true);
 
-        return view('routines.index', [
+        return view('routines.manage-routines.manage-routines', [
             'routines' => $routines,
             'parents' => $parents,
         ]);
